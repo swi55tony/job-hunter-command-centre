@@ -124,6 +124,14 @@ def va_dashboard():
                 st.session_state.campaign_running = False
                 st.rerun()
         
+        # Add clear data button
+        if st.button("🗑️ Clear All Data", type="secondary"):
+            st.session_state.jobs_data = []
+            st.session_state.approved_jobs = []
+            st.session_state.rejected_jobs = []
+            st.success("Data cleared!")
+            st.rerun()
+        
         st.write("---")
         st.write("### VA Guidelines")
         st.info("""
@@ -226,7 +234,7 @@ def run_actual_campaign(mode: str) -> List[Dict]:
         # This would be replaced with actual browser automation
         jobs_data = []
         
-        # Sample job data in the correct format
+        # Sample job data in the correct format with proper Upwork URLs
         sample_opportunities = [
             {
                 "title": "Fractional COO - Tech Startup Scaling",
@@ -259,7 +267,7 @@ def run_actual_campaign(mode: str) -> List[Dict]:
             # Score with your actual classifier
             icp_score = asyncio.run(classifier.score_job(mock_job))
             
-            # Format for display
+            # Format for display - ensuring URL is preserved
             job_data = {
                 "id": mock_job.id,
                 "title": opp["title"],
@@ -268,12 +276,15 @@ def run_actual_campaign(mode: str) -> List[Dict]:
                 "military_fit": 0.8,  # Would be calculated
                 "campaign": opp["campaign"],
                 "priority": "HIGH" if icp_score.confidence > 0.7 else "MEDIUM",
-                "url": opp["url"],
+                "url": opp["url"],  # Make sure URL is directly from source
                 "description": opp["description"],
                 "timestamp": datetime.now().isoformat(),
                 "fit_level": icp_score.fit_level,
                 "industry_match": icp_score.industry_match
             }
+            
+            # Debug: Print URL to console
+            print(f"DEBUG: Job URL set to: {job_data['url']}")
             
             jobs_data.append(job_data)
         
