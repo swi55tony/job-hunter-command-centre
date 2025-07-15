@@ -595,9 +595,59 @@ def show_system_status():
         st.write(f"{entry['status']} **{entry['time']}** - {entry['event']}")
 
 def generate_proposal_placeholder(job):
-    """Placeholder for proposal generation"""
-    st.success(f"📝 Proposal generated for: {job.get('title', 'Unknown')}")
-    st.info("💡 In production: This would integrate with Claude API to generate a tailored proposal")
+    """Generate proposal using Claude API or fallback"""
+    try:
+        # Import and test Claude integration
+        from claude_proposal_generator import ClaudeProposalGenerator
+        
+        # Initialize with secrets
+        generator = ClaudeProposalGenerator()
+        
+        # Check if API key is available
+        if hasattr(generator, 'api_key') and generator.api_key:
+            st.info("🤖 Claude API connected - generating custom proposal...")
+            
+            # Create mock ICP score for proposal generation
+            class MockICPScore:
+                def __init__(self):
+                    self.fit_level = "High"
+                    self.confidence = 0.9
+                    self.industry_match = "scaling_startup"
+                    self.pain_points = ["scaling operations", "founder bottleneck"]
+            
+            # Create mock job object
+            class MockJob:
+                def __init__(self, job_data):
+                    self.title = job_data.get('title', 'Unknown')
+                    self.description = job_data.get('description', 'No description')
+                    self.budget = job_data.get('budget', 'Not specified')
+                    self.url = job_data.get('url', '')
+                    self.id = job_data.get('id', 'unknown')
+            
+            mock_job = MockJob(job)
+            mock_icp = MockICPScore()
+            
+            # Generate proposal
+            with st.spinner('Generating executive proposal with Claude AI...'):
+                proposal_result = asyncio.run(generator.create_proposal(mock_job, mock_icp))
+            
+            if proposal_result and 'proposal_text' in proposal_result:
+                st.success(f"✅ Proposal generated ({proposal_result.get('word_count', 0)} words)")
+                st.write("**Generated Proposal:**")
+                st.write(proposal_result['proposal_text'])
+                st.write(f"**Model:** {proposal_result.get('model_used', 'unknown')}")
+            else:
+                st.error("❌ Proposal generation failed - using fallback")
+                st.info("💡 Fallback template would be used in production")
+        else:
+            st.warning("⚠️ Claude API key not found - using fallback template")
+            st.info("💡 In production: This would integrate with Claude API to generate a tailored proposal")
+            
+    except ImportError:
+        st.error("❌ Claude proposal generator not available")
+    except Exception as e:
+        st.error(f"❌ Proposal generation error: {e}")
+        st.info("💡 Fallback template would be used in production")
 
 def mark_job_submitted(job):
     """Mark job as submitted"""
