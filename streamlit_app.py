@@ -437,40 +437,71 @@ def show_campaign_analytics():
     
     st.write("### 📈 Campaign Intelligence Analysis")
     
-    # Create dataframe for analysis
-    df = pd.DataFrame(st.session_state.jobs_data)
-    
-    # Campaign performance chart
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        campaign_counts = df['campaign'].value_counts()
-        fig = px.bar(
-            x=campaign_counts.index, 
-            y=campaign_counts.values,
-            title="Targets by Campaign",
-            labels={'x': 'Campaign', 'y': 'Count'}
-        )
-        st.plotly_chart(fig, use_container_width=True)
-    
-    with col2:
-        fig = px.histogram(
-            df, 
-            x='campaign_score', 
-            title="Score Distribution",
-            bins=20
-        )
-        st.plotly_chart(fig, use_container_width=True)
-    
-    # Performance metrics
-    st.write("### 🎯 Performance Metrics")
-    
-    metrics_df = df.groupby('campaign').agg({
-        'campaign_score': ['mean', 'max', 'count'],
-        'military_fit': 'mean'
-    }).round(2)
-    
-    st.dataframe(metrics_df, use_container_width=True)
+    try:
+        # Create dataframe for analysis
+        df = pd.DataFrame(st.session_state.jobs_data)
+        
+        # Campaign performance chart
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if 'campaign' in df.columns:
+                campaign_counts = df['campaign'].value_counts()
+                fig = px.bar(
+                    x=campaign_counts.index, 
+                    y=campaign_counts.values,
+                    title="Targets by Campaign",
+                    labels={'x': 'Campaign', 'y': 'Count'}
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("Campaign data not available")
+        
+        with col2:
+            if 'campaign_score' in df.columns:
+                fig = px.histogram(
+                    df, 
+                    x='campaign_score', 
+                    title="Score Distribution",
+                    nbins=10
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("Score data not available")
+        
+        # Performance metrics
+        st.write("### 🎯 Performance Metrics")
+        
+        if 'campaign' in df.columns and 'campaign_score' in df.columns:
+            try:
+                metrics_df = df.groupby('campaign').agg({
+                    'campaign_score': ['mean', 'max', 'count'],
+                    'military_fit': 'mean' if 'military_fit' in df.columns else lambda x: 0
+                }).round(2)
+                
+                st.dataframe(metrics_df, use_container_width=True)
+            except Exception as e:
+                st.error(f"Error creating metrics: {e}")
+                # Simple fallback
+                st.write("**Campaign Summary:**")
+                for campaign in df['campaign'].unique():
+                    campaign_data = df[df['campaign'] == campaign]
+                    avg_score = campaign_data['campaign_score'].mean()
+                    count = len(campaign_data)
+                    st.write(f"- **{campaign}**: {count} jobs, avg score {avg_score:.1f}")
+        else:
+            st.info("Insufficient data for detailed metrics")
+            
+    except Exception as e:
+        st.error(f"Analytics error: {e}")
+        # Show basic info instead
+        st.write("**Basic Statistics:**")
+        st.write(f"- Total jobs analyzed: {len(st.session_state.jobs_data)}")
+        if st.session_state.jobs_data:
+            scores = [job.get('campaign_score', 0) for job in st.session_state.jobs_data]
+            if scores:
+                st.write(f"- Average score: {sum(scores)/len(scores):.1f}")
+                st.write(f"- Highest score: {max(scores):.1f}")
 
 def show_approved_jobs():
     """Show approved jobs ready for action"""
