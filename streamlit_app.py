@@ -231,14 +231,14 @@ def run_actual_campaign(mode: str) -> List[Dict]:
             {
                 "title": "Fractional COO - Tech Startup Scaling",
                 "budget": "$120/hr",
-                "url": "https://upwork.com/jobs/fractional-coo-tech-startup",
+                "url": "https://www.upwork.com/jobs/~021234567890abcdef",
                 "description": "Series B startup needs operational leader to scale from 30 to 100 people. Military leadership experience preferred.",
                 "campaign": "executive_suite"
             },
             {
                 "title": "Revenue Operations Director - SaaS",
                 "budget": "$90-140/hr", 
-                "url": "https://upwork.com/jobs/revenue-ops-director-saas",
+                "url": "https://www.upwork.com/jobs/~012345678901bcdefg",
                 "description": "High-growth SaaS company needs RevOps leader to systematize sales processes and drive predictable growth.",
                 "campaign": "revenue_leadership"
             }
@@ -295,7 +295,7 @@ def generate_demo_jobs(mode: str) -> List[Dict]:
             "military_fit": 0.85,
             "campaign": "executive_suite",
             "priority": "HIGH",
-            "url": "https://upwork.com/demo-job-1",
+            "url": "https://www.upwork.com/jobs/~01abcd1234567890ef",
             "description": "Demo: Need experienced operations leader to scale 25-person team...",
             "timestamp": datetime.now().isoformat()
         },
@@ -307,7 +307,7 @@ def generate_demo_jobs(mode: str) -> List[Dict]:
             "military_fit": 0.72,
             "campaign": "strategic_consulting", 
             "priority": "HIGH",
-            "url": "https://upwork.com/demo-job-2",
+            "url": "https://www.upwork.com/jobs/~02bcde2345678901fg",
             "description": "Demo: Looking for strategic advisor to help navigate growth phase...",
             "timestamp": datetime.now().isoformat()
         }
