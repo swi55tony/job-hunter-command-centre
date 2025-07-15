@@ -191,18 +191,26 @@ def run_campaign_simulation(mode: str):
     st.session_state.campaign_running = True
     
     try:
-        # Try to run actual campaign if modules are available
-        sample_jobs = run_actual_campaign(mode)
-        st.session_state.jobs_data.extend(sample_jobs)
+        # Show immediate feedback
+        with st.spinner('Launching campaign...'):
+            # Try to run actual campaign if modules are available
+            sample_jobs = run_actual_campaign(mode)
+            st.session_state.jobs_data.extend(sample_jobs)
+        
         st.success(f"🚀 Campaign completed in {mode} mode - {len(sample_jobs)} jobs analyzed")
+        
     except Exception as e:
         # Fallback to demo data if modules not available
         st.warning(f"⚠️ Running in demo mode: {str(e)}")
-        sample_jobs = generate_demo_jobs(mode)
-        st.session_state.jobs_data.extend(sample_jobs)
+        with st.spinner('Generating demo data...'):
+            sample_jobs = generate_demo_jobs(mode)
+            st.session_state.jobs_data.extend(sample_jobs)
+        
         st.info(f"📊 Demo campaign completed - {len(sample_jobs)} sample jobs")
     
+    # Force completion
     st.session_state.campaign_running = False
+    time.sleep(0.5)  # Brief pause to show completion
     st.rerun()
 
 def run_actual_campaign(mode: str) -> List[Dict]:
@@ -307,19 +315,23 @@ def generate_demo_jobs(mode: str) -> List[Dict]:
     return demo_jobs
 
 def show_campaign_progress():
-    """Show live campaign progress"""
+    """Show live campaign progress with timeout"""
     st.write("### 🚀 Campaign In Progress")
     
     progress_bar = st.progress(0)
     status_text = st.empty()
     
-    # Simulate progress
-    for i in range(100):
-        progress_bar.progress(i + 1)
-        status_text.text(f'Analysing targets... {i + 1}% complete')
-        time.sleep(0.01)
+    # Quick progress simulation (1 second total)
+    for i in range(10):
+        progress_bar.progress((i + 1) * 10)
+        status_text.text(f'Analysing targets... {(i + 1) * 10}% complete')
+        time.sleep(0.1)  # Much faster - 0.1 seconds per step
     
     st.success("✅ Campaign complete! Processing results...")
+    
+    # Force completion after 1 second
+    time.sleep(0.5)
+    st.session_state.campaign_running = False
 
 def show_va_results():
     """Show VA results summary"""
