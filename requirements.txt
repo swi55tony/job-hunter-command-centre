@@ -3,3 +3,8 @@ pandas
 plotly
 asyncio
 python-dotenv
+aiohttp
+requests
+python-docx
+playwright
+beautifulsoup4
