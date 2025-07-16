@@ -19,7 +19,14 @@ try:
     st.sidebar.success("✅ Job hunting modules loaded")
 except ImportError as e:
     MODULES_AVAILABLE = False
-    st.sidebar.warning(f"⚠️ Running in demo mode: {str(e)}")
+    st.sidebar.warning(f"⚠️ Some modules unavailable: {str(e)[:50]}...")
+    
+# Browser automation only available locally
+try:
+    from browser_connector import ExistingBrowserConnector
+    BROWSER_AVAILABLE = True
+except ImportError:
+    BROWSER_AVAILABLE = False
 
 # Set page config
 st.set_page_config(
