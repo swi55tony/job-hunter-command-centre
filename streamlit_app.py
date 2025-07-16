@@ -596,6 +596,9 @@ def show_system_status():
 
 def generate_proposal_placeholder(job):
     """Generate proposal using Claude API or fallback"""
+    from datetime import datetime
+    import asyncio
+    
     # Add timestamp to force update
     st.write(f"🔧 DEBUG: Function called at {datetime.now().strftime('%H:%M:%S')}")
     
@@ -659,7 +662,6 @@ def generate_proposal_placeholder(job):
             st.warning("⚠️ Claude API key not found - using fallback template")
             st.write("🔍 DEBUG: Checking secrets...")
             try:
-                import streamlit as st
                 claude_key = st.secrets.get('claude_api_key', 'NOT_FOUND')
                 st.write(f"🔑 DEBUG: Secret value: {str(claude_key)[:10] if claude_key != 'NOT_FOUND' else 'NOT_FOUND'}...")
             except Exception as secret_error:
