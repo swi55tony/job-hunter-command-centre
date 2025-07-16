@@ -659,6 +659,21 @@ def generate_proposal_placeholder(job):
                         st.success(f"📄 Word document created successfully!")
                         st.info(f"💡 Document saved to: {word_generator.get_proposals_folder()}")
                         st.write(f"**Filename:** {os.path.basename(word_filepath)}")
+                        
+                        # Add download button
+                        try:
+                            with open(word_filepath, 'rb') as file:
+                                file_data = file.read()
+                            
+                            st.download_button(
+                                label="📥 Download Word Document",
+                                data=file_data,
+                                file_name=os.path.basename(word_filepath),
+                                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                type="primary"
+                            )
+                        except Exception as download_error:
+                            st.error(f"❌ Download preparation failed: {download_error}")
                     else:
                         st.warning("⚠️ Word document creation failed")
                         
