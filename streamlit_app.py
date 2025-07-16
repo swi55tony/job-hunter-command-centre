@@ -596,27 +596,15 @@ def show_system_status():
 
 def generate_proposal_placeholder(job):
     """Generate proposal using Claude API or fallback"""
-    from datetime import datetime
-    import asyncio
-    
-    # Add timestamp to force update
-    st.write(f"🔧 DEBUG: Function called at {datetime.now().strftime('%H:%M:%S')}")
-    
     try:
         # Import and test Claude integration
         from claude_proposal_generator import ClaudeProposalGenerator
-        st.write("✅ DEBUG: ClaudeProposalGenerator imported successfully")
         
         # Initialize with secrets
         generator = ClaudeProposalGenerator()
-        st.write("✅ DEBUG: Generator initialized")
         
         # Check if API key is available
-        api_key_available = hasattr(generator, 'api_key') and generator.api_key
-        st.write(f"🔑 DEBUG: API key available: {api_key_available}")
-        
-        if api_key_available:
-            st.write(f"🔑 DEBUG: API key starts with: {str(generator.api_key)[:10]}...")
+        if hasattr(generator, 'api_key') and generator.api_key:
             st.info("🤖 Claude API connected - generating custom proposal...")
             
             # Create mock ICP score for proposal generation
@@ -639,42 +627,55 @@ def generate_proposal_placeholder(job):
             mock_job = MockJob(job)
             mock_icp = MockICPScore()
             
-            st.write("✅ DEBUG: Mock objects created")
-            
             # Generate proposal
             with st.spinner('Generating executive proposal with Claude AI...'):
-                try:
-                    proposal_result = asyncio.run(generator.create_proposal(mock_job, mock_icp))
-                    st.write("✅ DEBUG: Proposal generation completed")
-                except Exception as api_error:
-                    st.error(f"❌ DEBUG: API call failed: {api_error}")
-                    proposal_result = None
+                proposal_result = asyncio.run(generator.create_proposal(mock_job, mock_icp))
             
             if proposal_result and 'proposal_text' in proposal_result:
                 st.success(f"✅ Proposal generated ({proposal_result.get('word_count', 0)} words)")
                 st.write("**Generated Proposal:**")
                 st.write(proposal_result['proposal_text'])
                 st.write(f"**Model:** {proposal_result.get('model_used', 'unknown')}")
+                
+                # Test Word document generation
+                st.write("---")
+                st.write("**Word Document Generation:**")
+                
+                try:
+                    from word_proposal_generator import WordProposalGenerator
+                    word_generator = WordProposalGenerator()
+                    
+                    with st.spinner('Creating Word document...'):
+                        word_filepath = word_generator.create_proposal_document(
+                            job_title=job.get('title', 'Unknown'),
+                            job_url=job.get('url', ''),
+                            proposal_text=proposal_result['proposal_text'],
+                            budget=job.get('budget', 'Not specified'),
+                            campaign=job.get('campaign', 'Unknown'),
+                            score=job.get('campaign_score', 0)
+                        )
+                    
+                    if word_filepath:
+                        st.success(f"📄 Word document created successfully!")
+                        st.info(f"💡 Document saved to: {word_generator.get_proposals_folder()}")
+                        st.write(f"**Filename:** {os.path.basename(word_filepath)}")
+                    else:
+                        st.warning("⚠️ Word document creation failed")
+                        
+                except Exception as word_error:
+                    st.error(f"❌ Word generation error: {word_error}")
+                    st.info("💡 Ensure python-docx is installed: pip install python-docx")
+                
             else:
-                st.error("❌ Proposal generation failed - using fallback")
-                st.info("💡 Fallback template would be used in production")
+                st.error("❌ Proposal generation failed")
         else:
-            st.warning("⚠️ Claude API key not found - using fallback template")
-            st.write("🔍 DEBUG: Checking secrets...")
-            try:
-                claude_key = st.secrets.get('claude_api_key', 'NOT_FOUND')
-                st.write(f"🔑 DEBUG: Secret value: {str(claude_key)[:10] if claude_key != 'NOT_FOUND' else 'NOT_FOUND'}...")
-            except Exception as secret_error:
-                st.write(f"❌ DEBUG: Secret access error: {secret_error}")
+            st.warning("⚠️ Claude API key not found")
+            st.info("💡 Add your Claude API key to Streamlit secrets")
             
-            st.info("💡 In production: This would integrate with Claude API to generate a tailored proposal")
-            
-    except ImportError as import_error:
-        st.error(f"❌ DEBUG: Import error: {import_error}")
-        st.error("❌ Claude proposal generator not available")
+    except ImportError as e:
+        st.error(f"❌ Module import error: {e}")
     except Exception as e:
-        st.error(f"❌ DEBUG: General error: {e}")
-        st.info("💡 Fallback template would be used in production")
+        st.error(f"❌ Proposal generation error: {e}")
 
 def mark_job_submitted(job):
     """Mark job as submitted"""
