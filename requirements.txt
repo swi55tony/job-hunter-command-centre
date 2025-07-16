@@ -1,14 +1,6 @@
 streamlit
 pandas
 plotly
-asyncio
-python-dotenv
 aiohttp
 requests
 python-docx
-playwright
-beautifulsoup4
-playwright
-beautifulsoup4
-lxml
-aiohttp
