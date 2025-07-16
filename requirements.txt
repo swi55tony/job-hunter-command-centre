@@ -11,3 +11,4 @@ beautifulsoup4
 playwright
 beautifulsoup4
 lxml
+aiohttp
